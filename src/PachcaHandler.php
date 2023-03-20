@@ -116,7 +116,7 @@ class PachcaHandler extends AbstractProcessingHandler
             } elseif ($context instanceof stdClass) {
                 $context = (array)$context;
             } else {
-                $context = (array)$context; // not tested
+                $context = (array)$context; // not tested properly
             }
         }
 
@@ -145,11 +145,13 @@ class PachcaHandler extends AbstractProcessingHandler
                     $depth--;
                 } else {
                     if (is_string($value)) {
-                        $text .= "'" . $value . "'";
+                        $text .= "`" . $value . "`";
                     } elseif (is_bool($value)) {
                         $text .= $value ? "true" : "false";
                     } elseif (is_null($value)) {
                         $text .= "null";
+                    } elseif (is_int($value)) {
+                        $text .= $value;
                     } else {
                         $text .= $value;
                     }
