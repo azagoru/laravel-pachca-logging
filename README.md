@@ -21,6 +21,7 @@ Add the new driver type in your `config/logging.php` configuration
         'via' => SavenkovDev\PachcaLogger\PachcaLogger::class,
         'webhook' => env('LOG_PACHCA_WEBHOOK_URL'),
         'level' => env('LOG_LEVEL', 'debug'),
+        'maxDepth' => env('LOG_PACHCA_MAX_DEPTH', 2),
     ],
 ],
 ```
