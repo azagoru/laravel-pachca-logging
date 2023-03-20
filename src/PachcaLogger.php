@@ -11,7 +11,7 @@ class PachcaLogger
     {
         $log = new Logger('pachca');
 
-        $log->pushHandler(new PachcaHandler($config['webhook'], config('app.name'), $config['level'] ?? Level::Debug, true));
+        $log->pushHandler(new PachcaHandler($config['webhook'], config('app.name'), $config['level'] ?? Level::Debug, true, $config['maxDepth'] ?? 2));
 
         return $log;
     }
