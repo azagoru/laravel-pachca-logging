@@ -1,4 +1,4 @@
-# Laravel [Pachca](https://pachca.com) Logger
+# Laravel [Pachca](https://pachca.com) Logging
 ###### A Pachca based Monolog driver for Laravel
 
 [![Latest Stable Version][packagist-image]][packagist-url]
@@ -7,7 +7,7 @@
 
 ## Install
 ```bash
-composer require azagoru/laravel-pachca-logger
+composer require azagoru/laravel-pachca-logging
 ```
 
 ## Usage
@@ -21,6 +21,7 @@ Add the new driver type in your `config/logging.php` configuration
         'via' => Azagoru\PachcaLogging\PachcaLogger::class,
         'webhook' => env('LOG_PACHCA_WEBHOOK_URL'),
         'level' => env('LOG_LEVEL', 'debug'),
+        'name' => env('APP_NAME') ,
         'maxDepth' => env('LOG_PACHCA_MAX_DEPTH', 2),
     ],
 ],
@@ -48,7 +49,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.4/
 
 <!-- Markdown link & img dfn's -->
 
-[packagist-url]: https://packagist.org/packages/azagoru/laravel-pachca-logger
-[packagist-image]: https://poser.pugx.org/azagoru/laravel-pachca-logger/v/stable.svg
-[downloads-image]: https://poser.pugx.org/azagoru/laravel-pachca-logger/downloads.svg
-[license-image]: https://poser.pugx.org/azagoru/laravel-pachca-logger/license.svg
+[packagist-url]: https://packagist.org/packages/azagoru/laravel-pachca-logging
+[packagist-image]: https://poser.pugx.org/azagoru/laravel-pachca-logging/v/stable.svg
+[downloads-image]: https://poser.pugx.org/azagoru/laravel-pachca-logging/downloads.svg
+[license-image]: https://poser.pugx.org/azagoru/laravel-pachca-logging/license.svg
