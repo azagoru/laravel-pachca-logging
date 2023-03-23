@@ -1,5 +1,5 @@
 {
-    "name": "azagoru/laravel-pachca-logger",
+    "name": "azagoru/laravel-pachca-logging",
     "description": "Logging to a Pachca in Laravel",
     "keywords": [
         "laravel",
