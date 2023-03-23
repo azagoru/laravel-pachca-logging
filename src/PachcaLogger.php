@@ -14,7 +14,7 @@ class PachcaLogger
         $log->pushHandler(
             new PachcaHandler(
                 $config['webhook'],
-                $config['name'],
+                $config['name'] ?? 'App',
                     $config['level'] ?? Level::Debug,
                 true,
                     $config['maxDepth'] ?? 2)
