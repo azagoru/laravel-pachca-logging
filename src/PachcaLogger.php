@@ -1,6 +1,6 @@
 <?php
 
-namespace SavenkovDev\PachcaLogger;
+namespace Azagoru\PachcaLogging;
 
 use Monolog\Level;
 use Monolog\Logger;
@@ -11,7 +11,14 @@ class PachcaLogger
     {
         $log = new Logger('pachca');
 
-        $log->pushHandler(new PachcaHandler($config['webhook'], config('app.name'), $config['level'] ?? Level::Debug, true, $config['maxDepth'] ?? 2));
+        $log->pushHandler(
+            new PachcaHandler(
+                $config['webhook'],
+                $config['name'],
+                    $config['level'] ?? Level::Debug,
+                true,
+                    $config['maxDepth'] ?? 2)
+        );
 
         return $log;
     }

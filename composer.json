@@ -1,5 +1,5 @@
 {
-    "name": "asavenkov/laravel-pachca-logger",
+    "name": "azagoru/laravel-pachca-logger",
     "description": "Logging to a Pachca in Laravel",
     "keywords": [
         "laravel",
@@ -11,8 +11,8 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Andrey Savenkov",
-            "email": "a@savenkov.dev",
+            "name": "Andrey Zagoruyko",
+            "email": "another.ravick@gmail.com",
             "role": "Developer"
         }
     ],
@@ -26,7 +26,7 @@
     },
     "autoload": {
         "psr-4": {
-            "SavenkovDev\\PachcaLogger\\": "src/"
+            "Azagoru\\PachcaLogging\\": "src/"
         }
     },
     "config": {

@@ -7,7 +7,7 @@
 
 ## Install
 ```bash
-composer require asavenkov/laravel-pachca-logger
+composer require azagoru/laravel-pachca-logger
 ```
 
 ## Usage
@@ -18,7 +18,7 @@ Add the new driver type in your `config/logging.php` configuration
 'channels' => [
     'pachca' => [
         'driver' => 'custom',
-        'via' => SavenkovDev\PachcaLogger\PachcaLogger::class,
+        'via' => Azagoru\PachcaLogging\PachcaLogger::class,
         'webhook' => env('LOG_PACHCA_WEBHOOK_URL'),
         'level' => env('LOG_LEVEL', 'debug'),
         'maxDepth' => env('LOG_PACHCA_MAX_DEPTH', 2),
@@ -48,7 +48,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.4/
 
 <!-- Markdown link & img dfn's -->
 
-[packagist-url]: https://packagist.org/packages/asavenkov/laravel-pachca-logger
-[packagist-image]: https://poser.pugx.org/asavenkov/laravel-pachca-logger/v/stable.svg
-[downloads-image]: https://poser.pugx.org/asavenkov/laravel-pachca-logger/downloads.svg
-[license-image]: https://poser.pugx.org/asavenkov/laravel-pachca-logger/license.svg
+[packagist-url]: https://packagist.org/packages/azagoru/laravel-pachca-logger
+[packagist-image]: https://poser.pugx.org/azagoru/laravel-pachca-logger/v/stable.svg
+[downloads-image]: https://poser.pugx.org/azagoru/laravel-pachca-logger/downloads.svg
+[license-image]: https://poser.pugx.org/azagoru/laravel-pachca-logger/license.svg
