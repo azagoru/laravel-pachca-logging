@@ -64,15 +64,21 @@ class PachcaHandler extends AbstractProcessingHandler
             $exception->getTraceAsString();
     }
 
+    protected function getHeader(array|LogRecord $record): string
+    {
+        return ($record['level'] >= 400 ? "💥 " : "ℹ️ ")/* . $record['level'] . " from " . $this->name*/;
+    }
+
     /**
      * @throws GuzzleException
      */
     protected function write(array|LogRecord $record): void
     {
+        $header     = $this->getHeader($record);
+        $context    = $this->getContext($record);
         $stacktrace = $this->getStacktrace($record);
-        $context = $this->getContext($record);
-        $header = ($record['level'] >= 400 ? "💥 " : "ℹ️ ") . $record['level'] . " from " . $this->name;
-        $message = $header . PHP_EOL . PHP_EOL;
+
+        $message = $header/* . PHP_EOL . PHP_EOL*/;
         if ($record['message']) {
             $message .= $record['message'] . PHP_EOL .  PHP_EOL;
         }
