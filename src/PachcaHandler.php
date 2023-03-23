@@ -92,7 +92,7 @@ class PachcaHandler extends AbstractProcessingHandler
 
     protected function getHeader(array|LogRecord $record): string
     {
-        return ($record['level'] >= 400 ? "💥 " : "ℹ️ ") . $record['level'] . " " . $this->name;
+        return ($record['level'] >= 400 ? "💥 " : "ℹ️ ") . $record['level'] . " " . $this->name . ": ";
     }
 
     private function normalizeContext(array|object $context, int $depth = 0): string
