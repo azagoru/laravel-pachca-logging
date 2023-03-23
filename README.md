@@ -29,12 +29,6 @@ Add the new driver type in your `config/logging.php` configuration
 
 And add `LOG_PACHCA_WEBHOOK_URL` to your `.env` file.
 
-## Note
-You may need to clear cache after installation if you get `laravel.EMERGENCY: Unable to create configured logger. ... Log [pachca] is not defined.` with
-```bash
-php artisan config:clear
-```
-
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
