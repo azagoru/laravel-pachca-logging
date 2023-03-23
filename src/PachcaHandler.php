@@ -30,9 +30,35 @@ class PachcaHandler extends AbstractProcessingHandler
         parent::__construct($level ,$bubble);
     }
 
+    /**
+     * @throws GuzzleException
+     */
+    protected function write(array|LogRecord $record): void
+    {
+        $header     = $this->getHeader($record);
+        $context    = $this->getContext($record);
+        $stacktrace = $this->getStacktrace($record);
+
+        $message = $header;
+        if ($record['message']) {
+            $message .= $record['message'] . PHP_EOL .  PHP_EOL;
+        }
+        if (!empty($stacktrace)) {
+            $message .= $stacktrace  . PHP_EOL .  PHP_EOL;
+        } elseif (!empty($context)) {
+            $message .= $context  . PHP_EOL .  PHP_EOL;
+        }
+
+        $this->guzzle->request('POST', $this->webhook, [
+            RequestOptions::JSON => [
+                'message' =>  $message
+            ]
+        ]);
+    }
+
     protected function getContext(array|LogRecord $record): ?string
     {
-        if ($this->isStacktrace()) {
+        if ($this->hasStacktrace($record)) {
             return null;
         }
 
@@ -53,7 +79,7 @@ class PachcaHandler extends AbstractProcessingHandler
 
     protected function getStacktrace(array|LogRecord $record): ?string
     {
-        if (!$this->isStacktrace()) {
+        if (!$this->hasStacktrace($record)) {
             return null;
         }
         /** @var Throwable $exception */
@@ -66,34 +92,7 @@ class PachcaHandler extends AbstractProcessingHandler
 
     protected function getHeader(array|LogRecord $record): string
     {
-        return ($record['level'] >= 400 ? "💥 " : "ℹ️ ")/* . $record['level'] . " from " . $this->name*/;
-    }
-
-    /**
-     * @throws GuzzleException
-     */
-    protected function write(array|LogRecord $record): void
-    {
-        $header     = $this->getHeader($record);
-        $context    = $this->getContext($record);
-        $stacktrace = $this->getStacktrace($record);
-
-        $message = $header/* . PHP_EOL . PHP_EOL*/;
-        if ($record['message']) {
-            $message .= $record['message'] . PHP_EOL .  PHP_EOL;
-        }
-        if (!empty($stacktrace)) {
-            $stacktrace = str_replace('->', '→', $stacktrace);
-            $message .= $stacktrace  . PHP_EOL .  PHP_EOL;
-        } elseif (!empty($context)) {
-            $message .= $context  . PHP_EOL .  PHP_EOL;
-        }
-
-        $this->guzzle->request('POST', $this->webhook, [
-            RequestOptions::JSON => [
-                'message' =>  $message
-            ]
-        ]);
+        return ($record['level'] >= 400 ? "💥 " : "ℹ️ ") /*. $record['level'] . " " . $this->name*/;
     }
 
     private function normalizeContext(array|object $context, int $depth = 0): string
@@ -176,7 +175,7 @@ class PachcaHandler extends AbstractProcessingHandler
         return $text;
     }
 
-    private function isStacktrace() : bool
+    private function hasStacktrace(array|LogRecord $record) : bool
     {
         return is_subclass_of($record['context']['exception'] ?? '', Throwable::class);
     }
