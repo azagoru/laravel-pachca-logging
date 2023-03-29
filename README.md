@@ -23,6 +23,9 @@ Add the new driver type in your `config/logging.php` configuration
         'level' => env('LOG_LEVEL', 'debug'),
         'name' => env('APP_NAME') ,
         'maxDepth' => env('LOG_PACHCA_MAX_DEPTH', 2),
+        'withTrace' => true,
+        'withTraceMarkup' => true,
+        'withTraceVendorLines' => true,
     ],
 ],
 ```
