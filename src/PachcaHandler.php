@@ -20,8 +20,8 @@ class PachcaHandler extends AbstractProcessingHandler
 
     private int $maxDepth;
     private bool $withTrace;
-    private bool $withTraceVendorLines;
     private bool $withTraceMarkup;
+    private bool $withTraceVendorLines;
 
     private Client $guzzle;
 
@@ -44,7 +44,7 @@ class PachcaHandler extends AbstractProcessingHandler
         $this->withTraceMarkup = $withTraceMarkup;
         $this->withTraceVendorLines = $withTraceVendorLines;
 
-        parent::__construct($level ,$bubble);
+        parent::__construct($level, $bubble);
     }
 
     /**

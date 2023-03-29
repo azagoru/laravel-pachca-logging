@@ -17,7 +17,11 @@ class PachcaLogger
                 $config['name'] ?? 'App',
                     $config['level'] ?? Level::Debug,
                 true,
-                    $config['maxDepth'] ?? 2)
+                    $config['maxDepth'] ?? 2,
+                $config['withTrace'] ?? true,
+                $config['withTraceMarkup'] ?? true,
+                $config['withTraceVendorLines'] ?? true,
+            )
         );
 
         return $log;
