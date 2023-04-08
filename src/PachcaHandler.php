@@ -142,8 +142,11 @@ class PachcaHandler extends AbstractProcessingHandler
                 $line =
                     '#' . $key . "\n"
                     . $traceLine['file'] . '(' . $traceLine['line'] . ')'
-                    . ': ' . $traceLine['class'] . $traceLine['type'] . $traceLine['function']
-                    . '(' . implode(', ', $args) . ')';
+                    . ': ' . $traceLine['class'] . $traceLine['type'] . $traceLine['function'];
+
+                if ($args) {
+                    $line .= '(' . implode(', ', $args) . ')';
+                }
 
                 if ($this->withTraceMarkup) {
                     if (str_contains($traceLine['file'], app_path())) {
