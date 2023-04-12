@@ -147,11 +147,19 @@ class PachcaHandler extends AbstractProcessingHandler
                 $line =
                     '#' . $key . "\n"
                     . ($traceLine['file'] ?? '')
-                    . '(' . $traceLine['line'] . ')'
-                    . ': '
-                    . ($traceLine['class'] ?? '')
-                    . ($traceLine['type'] ?? '')
-                    . ($traceLine['function'] ?? '');
+                    . (isset($traceLine['line']) ? '(' . $traceLine['line'] . ')' : '');
+
+                if (
+                    isset($traceLine['class'])
+                    || isset($traceLine['type'])
+                    || isset($traceLine['function'])
+                ) {
+                    $line =
+                        ': '
+                        . ($traceLine['class'] ?? '')
+                        . ($traceLine['type'] ?? '')
+                        . ($traceLine['function'] ?? '');
+                }
 
                 if ($args) {
                     $line .= '(' . implode(', ', $args) . ')';
