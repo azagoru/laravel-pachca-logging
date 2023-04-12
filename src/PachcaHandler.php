@@ -119,21 +119,23 @@ class PachcaHandler extends AbstractProcessingHandler
                 }
 
                 $args = [];
-                foreach ($traceLine['args'] as $value) {
-                    if (is_string($value)) {
-                        $args[] = "`" . $value . "`";
-                    } elseif (is_bool($value)) {
-                        $args[] = $value ? "true" : "false";
-                    } elseif (is_null($value)) {
-                        $args[] = "null";
-                    } elseif (is_int($value)) {
-                        $args[] = $value;
-                    } elseif (is_object($value)) {
-                        $args[] = 'Object(' . get_class($value) . ')';
-                    } elseif (is_array($value)) {
-                        $args[] = 'Array';
-                    } else {
-                        $args[] = (string)$value;
+                if (isset($traceLine['args']) && $traceLine['args']) {
+                    foreach ($traceLine['args'] as $value) {
+                        if (is_string($value)) {
+                            $args[] = "`" . $value . "`";
+                        } elseif (is_bool($value)) {
+                            $args[] = $value ? "true" : "false";
+                        } elseif (is_null($value)) {
+                            $args[] = "null";
+                        } elseif (is_int($value)) {
+                            $args[] = $value;
+                        } elseif (is_object($value)) {
+                            $args[] = 'Object(' . get_class($value) . ')';
+                        } elseif (is_array($value)) {
+                            $args[] = 'Array';
+                        } else {
+                            $args[] = (string)$value;
+                        }
                     }
                 }
 
