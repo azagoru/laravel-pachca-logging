@@ -113,7 +113,10 @@ class PachcaHandler extends AbstractProcessingHandler
 
             foreach ($exception->getTrace() as $key => $traceLine) {
                 if (!$this->withTraceVendorLines) {
-                    if (str_contains($traceLine['file'], base_path('vendor'))) {
+                    if (
+                        isset($traceLine['file'])
+                        && str_contains($traceLine['file'], base_path('vendor'))
+                    ) {
                         continue;
                     }
                 }
@@ -155,7 +158,10 @@ class PachcaHandler extends AbstractProcessingHandler
                 }
 
                 if ($this->withTraceMarkup) {
-                    if (str_contains($traceLine['file'], app_path())) {
+                    if (
+                        isset($traceLine['file'])
+                        && str_contains($traceLine['file'], app_path())
+                    ) {
                         $line = '**' . $line . '**';
                     }
                 }
