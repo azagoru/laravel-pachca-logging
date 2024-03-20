@@ -186,6 +186,7 @@ class PachcaHandler extends AbstractProcessingHandler
         return ($record['level'] >= 400 ? "💥 " : "ℹ️ ") . $record['level'] . " " . $this->name . ": ";
     }
 
+    // todo показывать ключи ассоциативных массивов
     private function normalizeContext(array|object $context, int $depth = 0): string
     {
         if (is_array($context)) {
