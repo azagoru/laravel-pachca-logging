@@ -2,6 +2,7 @@
 
 namespace Azagoru\PachcaLogging;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
@@ -66,11 +67,15 @@ class PachcaHandler extends AbstractProcessingHandler
             $message .= $context  . PHP_EOL .  PHP_EOL;
         }
 
-        $this->guzzle->request('POST', $this->webhook, [
-            RequestOptions::JSON => [
-                'message' =>  $message
-            ]
-        ]);
+        try {
+            $this->guzzle->request('POST', $this->webhook, [
+                RequestOptions::JSON => [
+                    'message' => $message
+                ]
+            ]);
+        } catch (Exception $e) {
+            //
+        }
     }
 
     protected function getContext(array|LogRecord $record): ?string
