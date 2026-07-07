@@ -39,13 +39,13 @@ class PachcaHandler extends AbstractProcessingHandler
 
         $message = $header;
         if ($record['message']) {
-            $message .= $record['message'] . PHP_EOL .  PHP_EOL;
+            $message .= $record['message'] . $this->addEol();
         }
         
         if (!empty($stacktrace)) {
-            $message .= $stacktrace  . PHP_EOL .  PHP_EOL;
+            $message .= $stacktrace  . $this->addEol();
         } elseif (!empty($context)) {
-            $message .= $context  . PHP_EOL .  PHP_EOL;
+            $message .= $context  . $this->addEol();
         }
 
         try {
@@ -275,5 +275,10 @@ class PachcaHandler extends AbstractProcessingHandler
     private function hasStackTrace(array|LogRecord $record) : bool
     {
         return is_subclass_of($record['context']['exception'] ?? '', Throwable::class);
+    }
+
+    private function addEol(): string
+    {
+        return PHP_EOL .  PHP_EOL;
     }
 }
