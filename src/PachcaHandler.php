@@ -2,49 +2,29 @@
 
 namespace Azagoru\PachcaLogging;
 
-use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Level;
 use Monolog\LogRecord;
 use stdClass;
 use Throwable;
 
 class PachcaHandler extends AbstractProcessingHandler
 {
-    private string $webhook;
-    private string $name;
-
-    private int $maxDepth;
-    private bool $withTrace;
-    private bool $withTraceMarkup;
-    private bool $withTraceVendorLines;
-
-    private Client $guzzle;
-
     public function __construct(
-        $webhook, 
-        $name, 
-        $level = 'debug', 
-        $bubble = true, 
-        $maxDepth = 2,
-        $withTrace = true,
-        $withTraceMarkup = true,
-        $withTraceVendorLines = true,
-    )
-    {
-        $this->maxDepth = $maxDepth;
-        $this->name = $name;
-        $this->webhook = $webhook;
-        $this->guzzle = new Client();
-        $this->withTrace = $withTrace;
-        $this->withTraceMarkup = $withTraceMarkup;
-        $this->withTraceVendorLines = $withTraceVendorLines;
-
+        private readonly string $webhook,
+        private readonly string $name,
+        int|string|Level        $level = Level::Debug,
+        bool                    $bubble = true,
+        private readonly int    $maxDepth = 2,
+        private readonly bool   $withTrace = true,
+        private readonly bool   $withTraceMarkup = true,
+        private readonly bool   $withTraceVendorLines = true,
+    ) {
         parent::__construct($level, $bubble);
     }
 
@@ -55,12 +35,13 @@ class PachcaHandler extends AbstractProcessingHandler
     {
         $header     = $this->getHeader($record);
         $context    = $this->getContext($record);
-        $stacktrace = $this->getStacktrace($record);
+        $stacktrace = $this->getStackTrace($record);
 
         $message = $header;
         if ($record['message']) {
             $message .= $record['message'] . PHP_EOL .  PHP_EOL;
         }
+        
         if (!empty($stacktrace)) {
             $message .= $stacktrace  . PHP_EOL .  PHP_EOL;
         } elseif (!empty($context)) {
@@ -68,19 +49,24 @@ class PachcaHandler extends AbstractProcessingHandler
         }
 
         try {
-            $this->guzzle->request('POST', $this->webhook, [
+            (new Client())->request('POST', $this->webhook, [
                 RequestOptions::JSON => [
                     'message' => $message
                 ]
             ]);
-        } catch (Exception $e) {
+        } catch (Throwable) {
             //
         }
     }
 
-    protected function getContext(array|LogRecord $record): ?string
+    protected function getHeader(array|LogRecord $record): string
     {
-        if ($this->hasStacktrace($record)) {
+        return ($record['level'] >= 400 ? "💥 " : "ℹ️ ") . $record['level'] . " " . $this->name . ": ";
+    }
+
+    protected function getContext(array|LogRecord $record): string|null
+    {
+        if ($this->hasStackTrace($record)) {
             return null;
         }
 
@@ -99,11 +85,12 @@ class PachcaHandler extends AbstractProcessingHandler
         return "```php\n" . $text . "\n```";
     }
 
-    protected function getStacktrace(array|LogRecord $record): ?string
+    protected function getStackTrace(array|LogRecord $record): string|null
     {
-        if (!$this->hasStacktrace($record)) {
+        if (!$this->hasStackTrace($record)) {
             return null;
         }
+
         /** @var Throwable $exception */
         $exception = $record['context']['exception'];
 
@@ -113,82 +100,97 @@ class PachcaHandler extends AbstractProcessingHandler
             . ($this->withTraceMarkup ? '**' : '')
             . "\n\n";
 
-        if ($this->withTrace) {
-            $stacktrace .= "Stacktrace:\n";
+        if (!$this->withTrace) {
+            return $stacktrace;
+        }
 
-            foreach ($exception->getTrace() as $key => $traceLine) {
-                if (!$this->withTraceVendorLines) {
-                    if (
-                        isset($traceLine['file'])
-                        && str_contains($traceLine['file'], base_path('vendor'))
-                    ) {
-                        continue;
-                    }
-                }
+        $trace = $exception->getTrace();
+        if (empty($trace)) {
+            $stacktrace .= "Stack trace is empty.";
 
-                $args = [];
-                if (isset($traceLine['args']) && $traceLine['args']) {
-                    foreach ($traceLine['args'] as $value) {
-                        if (is_string($value)) {
-                            $args[] = "`" . $value . "`";
-                        } elseif (is_bool($value)) {
-                            $args[] = $value ? "true" : "false";
-                        } elseif (is_null($value)) {
-                            $args[] = "null";
-                        } elseif (is_int($value)) {
-                            $args[] = $value;
-                        } elseif (is_object($value)) {
-                            $args[] = 'Object(' . get_class($value) . ')';
-                        } elseif (is_array($value)) {
-                            $args[] = 'Array';
-                        } else {
-                            $args[] = (string)$value;
-                        }
-                    }
-                }
+            return $stacktrace;
+        }
 
-                $stacktrace .= "\n";
+        $stacktrace .= "Stack trace:\n";
 
-                $line =
-                    '#' . $key . "\n"
-                    . ($traceLine['file'] ?? '')
-                    . (isset($traceLine['line']) ? '(' . $traceLine['line'] . ')' : '');
-
+        foreach ($trace as $key => $traceLine) {
+            if (!$this->withTraceVendorLines) {
                 if (
-                    isset($traceLine['class'])
-                    || isset($traceLine['type'])
-                    || isset($traceLine['function'])
+                    isset($traceLine['file'])
+                    && str_contains($traceLine['file'], base_path('vendor'))
                 ) {
-                    $line =
-                        ': '
-                        . ($traceLine['class'] ?? '')
-                        . ($traceLine['type'] ?? '')
-                        . ($traceLine['function'] ?? '');
+                    continue;
                 }
-
-                if ($args) {
-                    $line .= '(' . implode(', ', $args) . ')';
-                }
-
-                if ($this->withTraceMarkup) {
-                    if (
-                        isset($traceLine['file'])
-                        && str_contains($traceLine['file'], app_path())
-                    ) {
-                        $line = '**' . $line . '**';
-                    }
-                }
-
-                $stacktrace .= $line;
             }
+
+            $stacktrace .= "\n";
+
+            $stacktrace .= $this->getTraceLine($key, $traceLine);
         }
 
         return $stacktrace;
     }
 
-    protected function getHeader(array|LogRecord $record): string
+    private function getTraceLine(int $key, array $traceLine): string
     {
-        return ($record['level'] >= 400 ? "💥 " : "ℹ️ ") . $record['level'] . " " . $this->name . ": ";
+        $line =
+            '#' . $key . "\n"
+            . ($traceLine['file'] ?? '')
+            . (isset($traceLine['line']) ? '(' . $traceLine['line'] . ')' : '');
+
+        if (
+            isset($traceLine['class'])
+            || isset($traceLine['type'])
+            || isset($traceLine['function'])
+        ) {
+            $line .=
+                "\n"
+                . ($traceLine['class'] ?? '')
+                . ($traceLine['type'] ?? '')
+                . ($traceLine['function'] ?? '');
+        }
+
+        $args = $this->getArgs($traceLine);
+        if ($args) {
+            $line .= '(' . implode(', ', $args) . ')';
+        }
+
+        if ($this->withTraceMarkup) {
+            if (
+                isset($traceLine['file'])
+                && str_contains($traceLine['file'], app_path())
+            ) {
+                $line = '**' . $line . '**';
+            }
+        }
+
+        return $line;
+    }
+
+    private function getArgs(array $traceLine): array
+    {
+        $args = [];
+        if (isset($traceLine['args']) && $traceLine['args']) {
+            foreach ($traceLine['args'] as $value) {
+                if (is_string($value)) {
+                    $args[] = "`" . $value . "`";
+                } elseif (is_bool($value)) {
+                    $args[] = $value ? "true" : "false";
+                } elseif (is_null($value)) {
+                    $args[] = "null";
+                } elseif (is_int($value)) {
+                    $args[] = $value;
+                } elseif (is_object($value)) {
+                    $args[] = 'Object(' . get_class($value) . ')';
+                } elseif (is_array($value)) {
+                    $args[] = 'Array';
+                } else {
+                    $args[] = (string)$value;
+                }
+            }
+        }
+
+        return $args;
     }
 
     // todo показывать ключи ассоциативных массивов
@@ -232,7 +234,7 @@ class PachcaHandler extends AbstractProcessingHandler
             $text .= str_repeat("\t", $depth + 1);
             $text .= "...\n";
         } else {
-            $isAssoc = Arr::isAssoc($context);
+            $isAssoc = !array_is_list($context);
 
             foreach ($context as $key => $value) {
                 $text .= str_repeat("\t", $depth + 1);
@@ -272,7 +274,7 @@ class PachcaHandler extends AbstractProcessingHandler
         return $text;
     }
 
-    private function hasStacktrace(array|LogRecord $record) : bool
+    private function hasStackTrace(array|LogRecord $record) : bool
     {
         return is_subclass_of($record['context']['exception'] ?? '', Throwable::class);
     }

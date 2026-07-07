@@ -12,12 +12,12 @@
     "authors": [
         {
             "name": "Andrey Zagoruyko",
-            "email": "another.ravick@gmail.com",
-            "role": "Developer"
+            "email": "andrey@azartel.ru",
+            "homepage": "https://azartel.ru"
         }
     ],
     "require": {
-        "php": "~8.0|~8.1|~8.2",
+        "php": "~8.2",
         "monolog/monolog": "~1.12|^2.0|^3.0",
         "guzzlehttp/guzzle": "^7.0"
     },
@@ -28,7 +28,5 @@
     },
     "config": {
         "sort-packages": true
-    },
-    "prefer-stable": true,
-    "minimum-stability": "dev"
+    }
 }
