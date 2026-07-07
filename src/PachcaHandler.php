@@ -71,7 +71,6 @@ class PachcaHandler extends AbstractProcessingHandler
         }
 
         $context = $record['context'] ?? null;
-
         if (!$context) {
             return null;
         }
@@ -193,7 +192,6 @@ class PachcaHandler extends AbstractProcessingHandler
         return $args;
     }
 
-    // todo показывать ключи ассоциативных массивов
     private function normalizeContext(array|object $context, int $depth = 0): string
     {
         if (is_array($context)) {
