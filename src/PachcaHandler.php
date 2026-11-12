@@ -70,18 +70,24 @@ class PachcaHandler extends AbstractProcessingHandler
             return null;
         }
 
-        $context = $record['context'] ?? null;
-        if (!$context) {
+        $extra      = $record['extra'] ?? null;
+        $context    = $record['context'] ?? null;
+
+        if (!$context && !$extra) {
             return null;
         }
 
-        if (!is_array($context) && !is_object($context)) {
-            return null;
+        $contextText = '';
+        if (is_array($context) || is_object($context)) {
+            $contextText = $this->normalizeContext($context);
         }
 
-        $text = $this->normalizeContext($context);
+        $extraText = '';
+        if (is_array($extra) || is_object($extra)) {
+            $extraText = $this->normalizeContext($extra);
+        }
 
-        return "```php\n" . $text . "\n```";
+        return "```php\n" . $contextText . $extraText . "\n```";
     }
 
     protected function getStackTrace(array|LogRecord $record): string|null
