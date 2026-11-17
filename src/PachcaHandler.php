@@ -34,19 +34,31 @@ class PachcaHandler extends AbstractProcessingHandler
     protected function write(array|LogRecord $record): void
     {
         $header     = $this->getHeader($record);
-        $context    = $this->getContext($record);
         $stacktrace = $this->getStackTrace($record);
+        $context    = $this->getContext($record);
+        $extra      = $this->getExtra($record);
 
         $message = $header;
         if ($record['message']) {
             $message .= $record['message'] . $this->addEol();
         }
-        
+
+        $code = '';
         if (!empty($stacktrace)) {
             $message .= $stacktrace  . $this->addEol();
         } elseif (!empty($context)) {
-            $message .= $context  . $this->addEol();
+            $code .= $context;
         }
+
+        if ($extra) {
+            $code .= $extra;
+        }
+
+        if ($code) {
+            $code = "```php\n" . $code . "\n```";
+        }
+
+        $message .= $code . $this->addEol();
 
         try {
             (new Client())->request('POST', $this->webhook, [
@@ -64,33 +76,36 @@ class PachcaHandler extends AbstractProcessingHandler
         return ($record['level'] >= 400 ? "💥 " : "ℹ️ ") . $record['level'] . " " . $this->name . ": ";
     }
 
-    protected function getContext(array|LogRecord $record): string|null
+    protected function getContext(array|LogRecord $record): ?string
+    {
+        return $this->getTextFromRecord($record, 'context');
+    }
+
+    protected function getExtra(array|LogRecord $record): ?string
+    {
+        return $this->getTextFromRecord($record, 'extra');
+    }
+
+    private function getTextFromRecord(array|LogRecord $record, string $property): ?string
     {
         if ($this->hasStackTrace($record)) {
             return null;
         }
 
-        $extra      = $record['extra'] ?? null;
-        $context    = $record['context'] ?? null;
-
-        if (!$context && !$extra) {
+        $value = $record[$property] ?? null;
+        if (!$value) {
             return null;
         }
 
-        $contextText = '';
-        if (is_array($context) || is_object($context)) {
-            $contextText = $this->normalizeContext($context);
+        $text = '';
+        if (is_array($value) || is_object($value)) {
+            $text = $this->normalizeContext($value);
         }
 
-        $extraText = '';
-        if (is_array($extra) || is_object($extra)) {
-            $extraText = $this->normalizeContext($extra);
-        }
-
-        return "```php\n" . $contextText . $extraText . "\n```";
+        return $text;
     }
 
-    protected function getStackTrace(array|LogRecord $record): string|null
+    protected function getStackTrace(array|LogRecord $record): ?string
     {
         if (!$this->hasStackTrace($record)) {
             return null;
@@ -212,8 +227,6 @@ class PachcaHandler extends AbstractProcessingHandler
             return '';
         }
 
-        $text = '';
-
         $class = is_object($context) ? get_class($context) : '';
 
         if (is_object($context)) {
@@ -228,11 +241,10 @@ class PachcaHandler extends AbstractProcessingHandler
             }
         }
 
+        $text = '';
         if ($class) {
             $text .= "$class: ";
         }
-
-        $text .= "$openWith\n";
 
         if ($depth > $this->maxDepth) {
             $text .= str_repeat("\t", $depth + 1);
@@ -273,7 +285,13 @@ class PachcaHandler extends AbstractProcessingHandler
         }
 
         $text .= str_repeat("\t", $depth);
-        $text .= "$closeWith\n";
+
+        if ($text) {
+            return
+                "$openWith\n"
+                . $text
+                . "$closeWith\n";
+        }
 
         return $text;
     }
